@@ -1,47 +1,16 @@
 #!/bin/bash
-# A.T.M. NEET LOCKDOWN - AUTOMATIC PROJECT GENERATOR
+# ATM NEET LOCKDOWN - STABLE PROJECT STRUCTURE GENERATOR
 
-echo "[+] Creating Android Project Structure..."
-mkdir -p .github/workflows
-mkdir -p gradle/wrapper
-mkdir -p app/src/main/java/com/atm/neetlockdown/core/security
-mkdir -p app/src/main/java/com/atm/neetlockdown/data/database
-mkdir -p app/src/main/java/com/atm/neetlockdown/presentation/ui
-mkdir -p app/src/main/java/com/atm/neetlockdown/ui/theme
-mkdir -p app/src/main/res/xml
+echo "[+] Creating Standard Directory Structure..."
+mkdir -p app/gradle/wrapper
+mkdir -p app/app/src/main/java/com/atm/neetlockdown/core/security
+mkdir -p app/app/src/main/java/com/atm/neetlockdown/data/database
+mkdir -p app/app/src/main/java/com/atm/neetlockdown/presentation/ui
+mkdir -p app/app/src/main/java/com/atm/neetlockdown/ui/theme
+mkdir -p app/app/src/main/res/xml
 
-# 1. GENERATE GITHUB WORKFLOW
-cat << 'EOF' > .github/workflows/android.yml
-name: ATM NEET System Execution Pipeline - Final Master Build
-on:
-  push:
-    branches: [ "main", "master" ]
-  workflow_dispatch:
-jobs:
-  compile_firmware:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout Code Map Tree
-      uses: actions/checkout@v4
-    - name: Setup System Compiler SDK Env 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: gradle
-    - name: Clean & Secure Gradle Workspace Matrix
-      run: chmod +x gradlew
-    - name: Direct Production Build Automation Trigger
-      run: ./gradlew assembleDebug --parallel --build-cache
-    - name: Export Verified Live Production Artifact Package
-      uses: actions/upload-artifact@v4
-      with:
-        name: ATM-NEET-LOCKDOWN-FINAL-SYSTEM-APK
-        path: app/build/outputs/apk/debug/app-debug.apk
-EOF
-
-# 2. GENERATE GRADLE WRAPPER PROPERTIES
-cat << 'EOF' > gradle/wrapper/gradle-wrapper.properties
+# 1. GRADLE WRAPPER PROPERTIES
+cat << 'EOF' > app/gradle/wrapper/gradle-wrapper.properties
 distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
 distributionUrl=https\://services.gradle.org/distributions/gradle-8.4-bin.zip
@@ -49,8 +18,8 @@ zipStoreBase=GRADLE_USER_HOME
 zipStorePath=wrapper/dists
 EOF
 
-# 3. GENERATE APP BUILD.GRADLE.KTS
-cat << 'EOF' > app/build.gradle.kts
+# 2. APP BUILD.GRADLE.KTS
+cat << 'EOF' > app/app/build.gradle.kts
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -68,8 +37,7 @@ android {
     }
     buildTypes {
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
+            isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
@@ -96,8 +64,8 @@ dependencies {
 }
 EOF
 
-# 4. GENERATE ANDROID MANIFEST
-cat << 'EOF' > app/src/main/AndroidManifest.xml
+# 3. ANDROID MANIFEST
+cat << 'EOF' > app/app/src/main/AndroidManifest.xml
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.atm.neetlockdown">
     <uses-permission android:name="android.permission.INTERNET" />
@@ -129,8 +97,8 @@ cat << 'EOF' > app/src/main/AndroidManifest.xml
 </manifest>
 EOF
 
-# 5. GENERATE ACCESSIBILITY CONFIG
-cat << 'EOF' > app/src/main/res/xml/accessibility_service_config.xml
+# 4. ACCESSIBILITY CONFIG
+cat << 'EOF' > app/app/src/main/res/xml/accessibility_service_config.xml
 <?xml version="1.0" encoding="utf-8"?>
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
     android:accessibilityEventTypes="typeWindowStateChanged"
@@ -140,8 +108,8 @@ cat << 'EOF' > app/src/main/res/xml/accessibility_service_config.xml
     android:notificationTimeout="50" />
 EOF
 
-# 6. GENERATE CORE LOCKDOWN SERVICE
-cat << 'EOF' > app/src/main/java/com/atm/neetlockdown/core/security/AtmLockdownService.kt
+# 5. LOCKDOWN SERVICE
+cat << 'EOF' > app/app/src/main/java/com/atm/neetlockdown/core/security/AtmLockdownService.kt
 package com.atm.neetlockdown.core.security
 import android.accessibilityservice.AccessibilityService
 import android.content.Intent
@@ -168,8 +136,8 @@ class AtmLockdownService : AccessibilityService() {
 }
 EOF
 
-# 7. GENERATE ANTI-CHEAT RECEIVER
-cat << 'EOF' > app/src/main/java/com/atm/neetlockdown/core/security/AntiCheatReceiver.kt
+# 6. ANTI-CHEAT RECEIVER
+cat << 'EOF' > app/app/src/main/java/com/atm/neetlockdown/core/security/AntiCheatReceiver.kt
 package com.atm.neetlockdown.core.security
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -183,8 +151,8 @@ class AntiCheatReceiver : BroadcastReceiver() {
 }
 EOF
 
-# 8. GENERATE DATABASE ENTITIES
-cat << 'EOF' > app/src/main/java/com/atm/neetlockdown/data/database/Entities.kt
+# 7. DATABASE ENTITIES
+cat << 'EOF' > app/app/src/main/java/com/atm/neetlockdown/data/database/Entities.kt
 package com.atm.neetlockdown.data.database
 import androidx.room.*
 
@@ -198,8 +166,8 @@ data class NcertBookEntity(@PrimaryKey val chapterId: String, val chapterName: S
 data class PrintableFlashcardEntity(@PrimaryKey val cardId: String, val chapterId: String, val questionFront: String, val answerBack: String)
 EOF
 
-# 9. GENERATE DATABASE MASTER & DAO
-cat << 'EOF' > app/src/main/java/com/atm/neetlockdown/data/database/AtmDatabase.kt
+# 8. DATABASE MASTER
+cat << 'EOF' > app/app/src/main/java/com/atm/neetlockdown/data/database/AtmDatabase.kt
 package com.atm.neetlockdown.data.database
 import android.content.Context
 import androidx.room.*
@@ -224,8 +192,8 @@ abstract class AtmDatabase : RoomDatabase() {
 }
 EOF
 
-# 10. GENERATE MILITARY THEME
-cat << 'EOF' > app/src/main/java/com/atm/neetlockdown/ui/theme/Theme.kt
+# 9. THEME
+cat << 'EOF' > app/app/src/main/java/com/atm/neetlockdown/ui/theme/Theme.kt
 package com.atm.neetlockdown.ui.theme
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -240,12 +208,11 @@ fun AtmNeetTheme(content: @Composable () -> Unit) {
 }
 EOF
 
-# 11. GENERATE DASHBOARD SCREEN UI (WITH NCERT READER & PRINTABLE FLASHCARDS)
-cat << 'EOF' > app/src/main/java/com/atm/neetlockdown/presentation/ui/DashboardScreen.kt
+# 10. DASHBOARD SCREEN UI
+cat << 'EOF' > app/app/src/main/java/com/atm/neetlockdown/presentation/ui/DashboardScreen.kt
 package com.atm.neetlockdown.presentation.ui
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -263,14 +230,12 @@ fun DashboardScreen() {
         Column(modifier = Modifier.fillMaxSize().background(Color.Black).padding(16.dp)) {
             Text("A.T.M. OPERATING ENVIRONMENT v1.0", color = MaterialTheme.colorScheme.primary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(12.dp))
-            
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Button(onClick = { activeTab = "DASHBOARD" }, modifier = Modifier.weight(1f)) { Text("STATS") }
                 Button(onClick = { activeTab = "NCERT" }, modifier = Modifier.weight(1f)) { Text("BOOKS") }
                 Button(onClick = { activeTab = "CARDS" }, modifier = Modifier.weight(1f)) { Text("PRINTS") }
             }
             Spacer(modifier = Modifier.height(16.dp))
-            
             when (activeTab) {
                 "DASHBOARD" -> {
                     Card(colors = CardDefaults.cardColors(containerColor = Color(0xFF111111)), modifier = Modifier.fillMaxWidth()) {
@@ -278,13 +243,13 @@ fun DashboardScreen() {
                             Text("STREAK COUNT", color = Color.Gray, fontSize = 12.sp)
                             Text("1 DAYS", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Black)
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text("LOCKDOWN PHASE: 10 HOURS HARD LOCK", color = MaterialTheme.colorScheme.primary, fontSize = 12.sp)
+                            Text("LOCKDOWN PHASE: ACTIVE Protection", color = MaterialTheme.colorScheme.primary, fontSize = 12.sp)
                         }
                     }
                 }
                 "NCERT" -> {
                     Box(modifier = Modifier.fillMaxSize().border(1.dp, Color.DarkGray).background(Color(0xFF0A0A0A)).padding(12.dp)) {
-                        Text("NCERT BIOLOGY - CHAPTER 1: CELL\n\n[NCERT Text loaded successfully from local repository. Read mode active.]", color = Color.LightGray, fontSize = 14.sp)
+                        Text("NCERT BIOLOGY - CELL\n\n[NCERT Text loaded successfully from local repository.]", color = Color.LightGray, fontSize = 14.sp)
                     }
                 }
                 "CARDS" -> {
@@ -292,8 +257,6 @@ fun DashboardScreen() {
                         Column {
                             Text("[FRONT SIDE - QUESTION]", color = Color.DarkGray, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                             Text("Draw and label Mitochondria Matrix.", color = Color.Black, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                            Spacer(modifier = Modifier.height(20.dp))
-                            Text("[BACK: HIGH-YIELD VECTOR DIAGRAM AREA FOR PRINTING]", color = Color.Blue, fontSize = 10.sp)
                         }
                     }
                 }
@@ -303,8 +266,8 @@ fun DashboardScreen() {
 }
 EOF
 
-# 12. GENERATE MAIN ACTIVITY
-cat << 'EOF' > app/src/main/java/com/atm/neetlockdown/MainActivity.kt
+# 11. MAIN ACTIVITY
+cat << 'EOF' > app/app/src/main/java/com/atm/neetlockdown/MainActivity.kt
 package com.atm.neetlockdown
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -319,18 +282,16 @@ class MainActivity : ComponentActivity() {
 }
 EOF
 
-# 13. GENERATE ROOT BUILD.GRADLE.KTS & SETTINGS.GRADLE.KTS
-cat << 'EOF' > build.gradle.kts
+# 12. ROOT GRADLE FILES
+cat << 'EOF' > app/build.gradle.kts
 plugins {
     id("com.android.application") version "8.2.2" apply false
     id("org.jetbrains.kotlin.android") version "1.9.22" apply false
 }
 EOF
 
-cat << 'EOF' > settings.gradle.kts
-pluginManagement {
-    repositories { google(); mavenCentral(); gradlePluginPortal() }
-}
+cat << 'EOF' > app/settings.gradle.kts
+pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories { google(); mavenCentral() }
@@ -339,10 +300,14 @@ rootProject.name = "atm-neet-lockdown"
 include(":app")
 EOF
 
-# 14. GENERATE GRADLE WRAPPER EXECUTABLE BINARY (BASE64 SIMULATION)
-echo "Downloading gradle wrapper wrapper task..."
-curl -sL https://github.com/gradle/gradle/raw/v8.4.0/gradle/wrapper/gradle-wrapper.jar -o gradle/wrapper/gradle-wrapper.jar
-touch gradlew
-chmod +x gradlew
+# 13. GRADLE WRAPPER JAR DOWNLOAD
+curl -sL https://github.com/gradle/gradle/raw/v8.4.0/gradle/wrapper/gradle-wrapper.jar -o app/gradle/wrapper/gradle-wrapper.jar
+touch app/gradlew
+cat << 'EOF' > app/gradlew
+#!/usr/bin/env bash
+# Gradle Wrapper Stub Script
+exec bash "$(dirname "$0")/gradle/wrapper/gradle-wrapper.jar" "$@"
+EOF
+chmod +x app/gradlew
 
-echo "[+] Setup Complete! Your full codebase is generated perfectly."
+echo "[+] Setup Complete Structure Built!"
