@@ -17,77 +17,60 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Initialize Complete Gradle Project
+    - name: Setup Fast Production Matrix
       run: |
-        # Project structures setup
-        mkdir -p gradle/wrapper
-        mkdir -p app/src/main/java/com/atm/neetlockdown
-        mkdir -p app/src/main/res/values
-
-        # Generate local wrapper configs
+        mkdir -p gradle/wrapper app/src/main/res/values
+        
         cat << 'EOF' > gradle/wrapper/gradle-wrapper.properties
         distributionBase=GRADLE_USER_HOME
         distributionPath=wrapper/dists
-        distributionUrl=https\://services.gradle.org/distributions/gradle-8.2-bin.zip
+        distributionUrl=https\://services.gradle.org/distributions/gradle-8.0-bin.zip
         zipStoreBase=GRADLE_USER_HOME
         zipStorePath=wrapper/dists
         EOF
 
-        # Base root configuration
-        cat << 'EOF' > build.gradle.kts
-        plugins {
-            id("com.android.application") version "8.1.2" apply false
-            id("org.jetbrains.kotlin.android") version "1.8.22" apply false
+        cat << 'EOF' > build.gradle
+        buildscript {
+            repositories { google(); mavenCentral() }
+            dependencies { classpath 'com.android.tools.build:gradle:8.0.2' }
         }
-        EOF
-
-        cat << 'EOF' > settings.gradle.kts
-        pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
-        dependencyResolutionManagement {
-            repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+        allprojects {
             repositories { google(); mavenCentral() }
         }
-        rootProject.name = "atm-neet-lockdown"
-        include(":app")
+        task clean(type: Delete) { delete rootProject.buildDir }
         EOF
 
-        # Sub-app structural layout
-        cat << 'EOF' > app/build.gradle.kts
-        plugins {
-            id("com.android.application")
-            id("org.jetbrains.kotlin.android")
-        }
+        cat << 'EOF' > settings.gradle
+        rootProject.name = "atm-neet-lockdown"
+        include ':app'
+        EOF
+
+        cat << 'EOF' > app/build.gradle
+        apply plugin: 'com.android.application'
         android {
-            namespace = "com.atm.neetlockdown"
-            compileSdk = 33
+            namespace "com.atm.neetlockdown"
+            compileSdkVersion 33
             defaultConfig {
-                applicationId = "com.atm.neetlockdown"
-                minSdk = 26
-                targetSdk = 33
-                versionCode = 1
-                versionName = "1.0.0"
+                applicationId "com.atm.neetlockdown"
+                minSdkVersion 26
+                targetSdkVersion 33
+                versionCode 1
+                versionName "1.0"
             }
-            compileOptions {
-                sourceCompatibility = JavaVersion.VERSION_11
-                targetCompatibility = JavaVersion.VERSION_11
-            }
-            kotlinOptions { jvmTarget = "11" }
         }
         dependencies {
-            implementation("androidx.core:core-ktx:1.10.1")
-            implementation("androidx.appcompat:appcompat:1.6.1")
+            implementation 'androidx.appcompat:appcompat:1.6.1'
         }
         EOF
 
-    - name: Inject Android Manifest and Base Resources
+    - name: Initialize App Core Layout
       run: |
+        mkdir -p app/src/main/java/com/atm/neetlockdown
+        
         cat << 'EOF' > app/src/main/AndroidManifest.xml
         <?xml version="1.0" encoding="utf-8"?>
         <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.atm.neetlockdown">
-            <application
-                android:label="A.T.M. NEET LOCKDOWN"
-                android:supportsRtl="true"
-                android:theme="@style/Theme.AppCompat.NoActionBar">
+            <application android:label="A.T.M. NEET LOCKDOWN" android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
                 <activity android:name=".MainActivity" android:exported="true">
                     <intent-filter>
                         <action android:name="android.intent.action.MAIN" />
@@ -98,39 +81,31 @@ jobs:
         </manifest>
         EOF
 
-        cat << 'EOF' > app/src/main/res/values/themes.xml
-        <resources>
-            <style name="Theme.AppCompat.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar" />
-        </resources>
-        EOF
+        cat << 'EOF' > app/src/main/java/com/atm/neetlockdown/MainActivity.java
+        package com.atm.neetlockdown;
+        import android.os.Bundle;
+        import android.widget.TextView;
+        import android.view.Gravity;
+        import android.graphics.Color;
 
-    - name: Inject Native Activity Source Code
-      run: |
-        cat << 'EOF' > app/src/main/java/com/atm/neetlockdown/MainActivity.kt
-        package com.atm.neetlockdown
-        import android.os.Bundle
-        import androidx.appcompat.app.AppCompatActivity
-        import android.widget.TextView
-        import android.view.Gravity
-
-        class MainActivity : AppCompatActivity() {
-            override fun onCreate(savedInstanceState: Bundle?) {
-                super.onCreate(savedInstanceState)
-                val textView = TextView(this).apply {
-                    text = "A.T.M. OPERATING ENVIRONMENT v1.0\nSYSTEM PROTECTION STATUS: ACTIVE"
-                    textSize = 18f
-                    gravity = Gravity.CENTER
-                    setPadding(32, 32, 32, 32)
-                }
-                setContentView(textView)
+        public class MainActivity extends android.app.Activity {
+            @Override
+            protected void onCreate(Bundle savedInstanceState) {
+                super.onCreate(savedInstanceState);
+                TextView tv = new TextView(this);
+                tv.setText("A.T.M. OPERATING ENVIRONMENT v1.0\nSYSTEM PROTECTION STATUS: ACTIVE");
+                tv.setTextSize(20);
+                tv.setTextColor(Color.GREEN);
+                tv.setBackgroundColor(Color.BLACK);
+                tv.setGravity(Gravity.CENTER);
+                setContentView(tv);
             }
         }
         EOF
 
-    - name: Setup Gradle Environment and Force Compilation
+    - name: Trigger Build Execution
       run: |
-        # Download and fix missing execution wrappers locally inside environment 
-        gradle wrapper --gradle-version 8.2
+        gradle wrapper --gradle-version 8.0
         chmod +x gradlew
         ./gradlew assembleDebug --no-daemon
 
