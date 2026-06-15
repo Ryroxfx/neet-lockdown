@@ -1,44 +1,36 @@
-name: Execute Automation Build
+
+name: Generate Android App APK
 on:
   push:
     branches: [ "main", "master" ]
   workflow_dispatch:
 
 jobs:
-  run_sh_and_compile:
+  build:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout Repo
+    - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Run Single File Automation Project Creator
+    - name: Run Project Builder Script
       run: |
         chmod +x build_app.sh
-        ./build_app.sh
+        bash build_app.sh
 
-    - name: Setup Java Environment
+    - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
-        cache: gradle
 
-    - name: Validate Project Directory Structure
+    - name: Build Debug APK with Gradle
       run: |
-        ls -la
-        if [ -d "app" ]; then echo "App folder exists"; else echo "App folder MISSING"; fi
-
-    - name: Force Gradle Wrapper Generation
-      run: |
-        gradle wrapper --gradle-version 8.4
-
-    - name: Compile Real APK Now
-      run: |
+        cd app
         chmod +x gradlew
-        ./gradlew assembleDebug --stacktrace
+        ./gradlew assembleDebug --no-daemon
 
-    - name: Upload Finished APK
+    - name: Upload Output Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: ATM-NEET-LOCKDOWN-SINGLE-FILE-BUILD
-        path: "**/build/outputs/apk/debug/*.apk"
+        name: NEET-LOCKDOWN-FINAL-APK
+        path: app/app/build/outputs/apk/debug/*.apk
