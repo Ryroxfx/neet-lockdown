@@ -17,11 +17,19 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Setup Pure Android Build Files
+    - name: Setup Official Android Environment
+      uses: gradle/actions/setup-gradle@v3
+
+    - name: Create Base Project Structures
       run: |
         mkdir -p app/src/main/java/com/atm/neetlockdown
         
-        # Base settings without complex plugins
+        # Creating valid build configuration files
+        cat << 'EOF' > settings.gradle
+        rootProject.name = "atm-neet-lockdown"
+        include ':app'
+        EOF
+
         cat << 'EOF' > build.gradle
         buildscript {
             repositories { google(); mavenCentral() }
@@ -30,11 +38,6 @@ jobs:
         allprojects {
             repositories { google(); mavenCentral() }
         }
-        EOF
-
-        cat << 'EOF' > settings.gradle
-        rootProject.name = "atm-neet-lockdown"
-        include ':app'
         EOF
 
         cat << 'EOF' > app/build.gradle
@@ -55,7 +58,7 @@ jobs:
         }
         EOF
 
-    - name: Write Android Source Structure
+    - name: Write Native Manifest and Code
       run: |
         cat << 'EOF' > app/src/main/AndroidManifest.xml
         <?xml version="1.0" encoding="utf-8"?>
@@ -81,23 +84,20 @@ jobs:
         public class MainActivity extends android.app.Activity {
             @Override
             protected void onCreate(Bundle savedInstanceState) {
-                super.onCreate(savedInstanceState) {
-                    TextView tv = new TextView(this);
-                    tv.setText("A.T.M. OPERATING ENVIRONMENT\nSTATUS: ACTIVE");
-                    tv.setTextSize(20);
-                    tv.setTextColor(Color.GREEN);
-                    tv.setBackgroundColor(Color.BLACK);
-                    tv.setGravity(Gravity.CENTER);
-                    setContentView(tv);
-                }
+                super.onCreate(savedInstanceState);
+                TextView tv = new TextView(this);
+                tv.setText("A.T.M. OPERATING ENVIRONMENT\nSTATUS: ACTIVE");
+                tv.setTextSize(22);
+                tv.setTextColor(Color.GREEN);
+                tv.setBackgroundColor(Color.BLACK);
+                tv.setGravity(Gravity.CENTER);
+                setContentView(tv);
             }
         }
         EOF
 
-    - name: Build with Global Gradle Installer
-      run: |
-        # Using pre-installed global gradle directly to compile
-        gradle assembleDebug --no-daemon
+    - name: Compile and Build App Bundle
+      run: gradle assembleDebug --no-daemon
 
     - name: Export Output Artifact Package
       uses: actions/upload-artifact@v4
